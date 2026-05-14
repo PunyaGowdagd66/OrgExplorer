@@ -1,6 +1,6 @@
 - [ ] Ritik submits PR of his prototype to this repo. (Ritik)
 - [ ] Merge Ritik's PR. (Bruno)
-- [ ] Close stale PRs. (Rahul)
+- [x] Close stale PRs. (Rahul)
 - [ ] Create logo for OrgExplorer.
 - [ ] Update ReadMe. (Rahul (concept) + Ritik (technical instructions))
 - [ ] Deploy OrgExplorer to GitHub pages. (Bruno)
