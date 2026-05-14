@@ -4,3 +4,4 @@
 - [ ] Create logo for OrgExplorer.
 - [ ] Update ReadMe. (Rahul (concept) + Ritik (technical instructions))
 - [ ] Deploy OrgExplorer to GitHub pages. (Bruno)
+- [ ] Add OrgRExplorer to https://aossie.org. (Rahul or Ritik)
