@@ -1,0 +1,200 @@
+import React, { useState } from 'react'
+import { FiEye, FiEyeOff, FiTrash2, FiSave, FiRefreshCw } from 'react-icons/fi'
+import { useApp } from '../context/AppContext'
+import { C } from '../components/UI'
+import { cacheClear } from '../services/github'
+
+export default function SettingsPage() {
+  const { pat, savePat, rateLimit } = useApp()
+  const [draft,   setDraft]   = useState(pat)
+  const [show,    setShow]    = useState(false)
+  const [saved,   setSaved]   = useState(false)
+  const [cleared, setCleared] = useState(false)
+
+  const handleSave = () => {
+    savePat(draft.trim())
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
+
+  const handleDelete = () => {
+    savePat('')
+    setDraft('')
+  }
+
+  const handleClear = async () => {
+    await cacheClear()
+    setCleared(true)
+    setTimeout(() => setCleared(false), 2000)
+  }
+
+  const rateColor = rateLimit
+    ? rateLimit.remaining / rateLimit.limit > 0.3 ? 'var(--green)' : 'var(--red)'
+    : 'var(--text2)'
+
+  return (
+    <div style={{ padding: '32px 24px', maxWidth: 900, margin: '0 auto' }} className="fade-up">
+      <h1 style={{ fontSize: 26, fontWeight: 700, marginBottom: 24 }}>Settings</h1>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+
+        {/* Left column */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+          {/* GitHub Authentication */}
+          <div style={C.card}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <div>
+                <div style={{ fontWeight: 600, fontSize: 15 }}>GitHub Authentication</div>
+                <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>Personal Access Token (PAT)</div>
+              </div>
+              {pat && (
+                <span style={C.pill('var(--green)', 'rgba(34,197,94,.12)')}>AUTHENTICATED</span>
+              )}
+            </div>
+
+            <div style={{ fontSize: 11, color: 'var(--text2)', letterSpacing: '.06em', marginBottom: 6 }}>
+              PRIVATE TOKEN KEY
+            </div>
+            <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+              <input
+                type={show ? 'text' : 'password'}
+                value={draft}
+                onChange={e => setDraft(e.target.value)}
+                placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+                style={{ ...C.input, flex: 1 }}
+                onKeyDown={e => e.key === 'Enter' && handleSave()}
+              />
+              <button
+                onClick={() => setShow(s => !s)}
+                style={{ ...C.btn('ghost'), padding: '8px 10px', display: 'flex', alignItems: 'center' }}
+              >
+                {show ? <FiEyeOff size={14} /> : <FiEye size={14} />}
+              </button>
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                onClick={handleSave}
+                style={{ ...C.btn('primary'), display: 'flex', alignItems: 'center', gap: 5, fontSize: 13 }}
+              >
+                <FiSave size={13} /> {saved ? 'Saved' : 'Save'}
+              </button>
+              <button
+                onClick={handleDelete}
+                style={{ ...C.btn('ghost'), display: 'flex', alignItems: 'center', gap: 5, fontSize: 13 }}
+              >
+                <FiTrash2 size={13} /> Delete
+              </button>
+            </div>
+          </div>
+
+          {/* How to create a PAT */}
+          <div style={C.card}>
+            <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 14 }}>How to create a PAT</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              {[
+                ['01', 'Go to GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)'],
+                ['02', 'Click "Generate new token (classic)"'],
+                ['03', 'Select scopes: read:org and public_repo'],
+                ['04', 'Copy the token and paste it above, then click Save'],
+              ].map(([n, text]) => (
+                <div key={n} style={{ background: 'var(--surface2)', borderRadius: 6, padding: '10px 12px' }}>
+                  <div style={{ color: 'var(--accent)', fontWeight: 700, fontSize: 15, marginBottom: 4 }}>{n}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text2)', lineHeight: 1.5 }}>{text}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Data Cache */}
+          <div style={C.card}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <div>
+                <div style={{ fontWeight: 600, fontSize: 15 }}>Data Cache</div>
+                <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>IndexedDB · 1-hour TTL per entry</div>
+              </div>
+              <button
+                onClick={handleClear}
+                style={{ ...C.btn('ghost'), fontSize: 12, display: 'flex', alignItems: 'center', gap: 5 }}
+              >
+                <FiTrash2 size={13} /> {cleared ? 'Cleared' : 'Clear All'}
+              </button>
+            </div>
+            <p style={{ fontSize: 12, color: 'var(--text2)', lineHeight: 1.6 }}>
+              All API responses are cached in IndexedDB with a 1-hour TTL. Cache keys are namespaced per org and per resource type — enabling partial cache hits across paginated fetches. Clearing forces fresh API calls on the next explore.
+            </p>
+          </div>
+        </div>
+
+        {/* Right column */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+          {/* API Quota */}
+          <div style={C.card}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <div style={{ fontWeight: 600, fontSize: 15, letterSpacing: '.03em' }}>API Quota</div>
+              <FiRefreshCw size={14} color="var(--text2)" style={{ cursor: 'pointer' }} />
+            </div>
+
+            {rateLimit ? (
+              <>
+                <div style={{ marginBottom: 4 }}>
+                  <span style={{ fontSize: 28, fontWeight: 700, color: rateColor }}>
+                    {rateLimit.remaining.toLocaleString()}
+                  </span>
+                  <span style={{ fontSize: 14, color: 'var(--text2)', marginLeft: 4 }}>
+                    / {rateLimit.limit.toLocaleString()}
+                  </span>
+                </div>
+                <div style={{ ...C.label, marginBottom: 10 }}>Requests Remaining</div>
+                <div style={{ height: 6, background: 'var(--border)', borderRadius: 3, marginBottom: 10 }}>
+                  <div style={{
+                    width: `${rateLimit.remaining / rateLimit.limit * 100}%`,
+                    height: '100%', background: rateColor, borderRadius: 3,
+                  }} />
+                </div>
+                {!pat && (
+                  <div style={{ fontSize: 12, color: 'var(--text2)', padding: '8px 10px', background: 'rgba(245,197,24,.06)', borderRadius: 4 }}>
+                    Add a PAT above to unlock 5,000 req/hr instead of 60.
+                  </div>
+                )}
+              </>
+            ) : (
+              <div style={{ fontSize: 13, color: 'var(--text2)' }}>
+                Explore an organization to see your live API quota status.
+              </div>
+            )}
+          </div>
+
+          {/* Architect Meta */}
+          <div style={C.card}>
+            <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 16, letterSpacing: '.03em' }}>Architect Meta</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+              {[
+                ['Core Version',    'v2.0.0-stable'],
+                ['Architecture',    'Client-side only, no backend'],
+                ['API strategy',    '53 req/hr unauthenticated'],
+                ['Cache',           'IndexedDB + React Context'],
+              ].map(([k, v]) => (
+                <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                  <span style={{ color: 'var(--text2)' }}>{k}</span>
+                  <span style={{ color: 'var(--accent)', fontWeight: 500 }}>{v}</span>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ ...C.label, marginBottom: 10 }}>Stack Integrity</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {['React 18 + Vite', 'React Router v6', 'D3.js v7 (network graph)', 'Recharts 2 (time-series)', 'react-icons', 'IndexedDB cache'].map(s => (
+                <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
+                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--green)', flexShrink: 0 }} />
+                  <span style={{ color: 'var(--text2)' }}>{s}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

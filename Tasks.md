@@ -1,4 +1,4 @@
-- [ ] Ritik submits PR of his prototype to this repo. (Ritik)
+- [x] Ritik submits PR of his prototype to this repo. (Ritik)
 - [ ] Merge Ritik's PR. (Bruno)
 - [x] Close stale PRs. (Rahul)
 - [ ] Create logo for OrgExplorer.

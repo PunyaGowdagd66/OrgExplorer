@@ -1,0 +1,144 @@
+import React from 'react'
+import { useNavigate } from 'react-router-dom'
+import { FiExternalLink, FiShare2, FiArrowRight } from 'react-icons/fi'
+import { useApp } from '../context/AppContext'
+import { C, StatCard, HealthBar } from '../components/UI'
+
+const LANG_COLORS = ['#22c55e','#f5c518','#3b82f6','#ef4444','#a855f7','#f97316','#06b6d4']
+const fmt = n => n > 999 ? (n / 1000).toFixed(1) + 'k' : String(n)
+
+export default function OverviewPage() {
+  const { orgs, model } = useApp()
+  const navigate = useNavigate()
+  if (!model) return null
+
+  const { allRepos } = model
+  const isMulti     = orgs.length > 1
+  const totalStars  = allRepos.reduce((s, r) => s + r.stargazers_count, 0)
+  const totalForks  = allRepos.reduce((s, r) => s + r.forks_count, 0)
+  const activeRepos = allRepos.filter(r => r.lifecycle === 'Thriving' || r.lifecycle === 'Stable').length
+
+  const langMap = {}
+  allRepos.forEach(r => { if (r.language) langMap[r.language] = (langMap[r.language] || 0) + 1 })
+  const langs    = Object.entries(langMap).sort((a, b) => b[1] - a[1]).slice(0, 7)
+  const langTotal = langs.reduce((s, [, c]) => s + c, 0)
+
+  const topRepos = [...allRepos].sort((a, b) => b.healthScore - a.healthScore).slice(0, 5)
+
+  const NavCard = ({ to, label, sub }) => (
+    <div
+      onClick={() => navigate(to)}
+      onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
+      onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+      style={{ ...C.card, cursor: 'pointer', transition: 'border-color .2s' }}
+    >
+      <div style={{ fontWeight: 600, marginBottom: 4, fontSize: 14 }}>{label}</div>
+      <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 12, minHeight: 32 }}>{sub}</div>
+      <span style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+        View {label} <FiArrowRight size={12} />
+      </span>
+    </div>
+  )
+
+  return (
+    <div style={{ padding: '32px 24px', maxWidth: 1100, margin: '0 auto' }} className="fade-up">
+
+      {/* Org identity bar */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 28 }}>
+        {isMulti ? (
+          <div style={{ display: 'flex' }}>
+            {orgs.slice(0, 3).map((o, i) => o.avatar_url && (
+              <img key={o.login} src={o.avatar_url} alt={o.login}
+                style={{ width: 36, height: 36, borderRadius: '50%', border: '2px solid var(--bg)', marginLeft: i ? -10 : 0 }} />
+            ))}
+          </div>
+        ) : (
+          orgs[0]?.avatar_url && (
+            <img src={orgs[0].avatar_url} alt="" style={{ width: 56, height: 56, borderRadius: '50%', border: '2px solid var(--border)' }} />
+          )
+        )}
+        <div style={{ flex: 1 }}>
+          <h1 style={{ fontSize: 22, fontWeight: 700 }}>
+            {isMulti ? orgs.map(o => o.login).join(' + ') : (orgs[0]?.name || orgs[0]?.login)}
+          </h1>
+          <p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>
+            {isMulti
+              ? `${orgs.length} organizations — combined portfolio view`
+              : (orgs[0]?.description || `@${orgs[0]?.login}`)}
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {!isMulti && orgs[0]?.html_url && (
+            <a href={orgs[0].html_url} target="_blank" rel="noreferrer"
+              style={{ ...C.btn('primary'), display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
+              <FiExternalLink size={13} /> View on GitHub
+            </a>
+          )}
+          <button
+            onClick={() => navigator.clipboard?.writeText(window.location.href)}
+            style={{ ...C.btn('ghost'), display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}
+          >
+            <FiShare2 size={13} /> Share
+          </button>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 24 }}>
+        <StatCard label="Total Repos"  value={allRepos.length.toLocaleString()} />
+        <StatCard label="Total Stars"  value={fmt(totalStars)} />
+        <StatCard label="Total Forks"  value={fmt(totalForks)} />
+        <StatCard label="Active Repos" value={activeRepos} sub={`${Math.round(activeRepos / allRepos.length * 100)}% of total`} />
+      </div>
+
+      {/* Language + top repos */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>
+        <div style={C.card}>
+          <div style={{ fontWeight: 600, marginBottom: 4 }}>Language Distribution</div>
+          <div style={{ ...C.label, marginBottom: 16 }}>Technology Stack Analysis</div>
+          <div style={{ height: 10, borderRadius: 5, overflow: 'hidden', display: 'flex', marginBottom: 16 }}>
+            {langs.map(([lang, count], i) => (
+              <div key={lang} style={{ flex: count / langTotal, background: LANG_COLORS[i] }} title={lang} />
+            ))}
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+            {langs.map(([lang, count], i) => (
+              <div key={lang} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: LANG_COLORS[i] }} />
+                <span style={{ fontSize: 12, color: 'var(--text2)' }}>
+                  {lang} <strong style={{ color: 'var(--text)' }}>{Math.round(count / langTotal * 100)}%</strong>
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={C.card}>
+          <div style={{ fontWeight: 600, marginBottom: 4 }}>High Impact Repositories</div>
+          <div style={{ ...C.label, marginBottom: 16 }}>By Composite Health Score</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {topRepos.map(r => (
+              <div key={r.id}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <span style={{ fontSize: 12, fontWeight: 500 }}>{r.name}</span>
+                  <span style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600 }}>{r.healthScore}</span>
+                </div>
+                <HealthBar score={r.healthScore} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Nav cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14 }}>
+        <NavCard to="/repositories"  label="Repositories"  sub="Explore and sort repos by health, activity, and lifecycle state" />
+        <NavCard to="/contributors"  label="Contributors"  sub="Analyze contribution patterns, bus factor, and connector signals" />
+        <NavCard to="/network"       label="Network Graph" sub="Visualize contributor-repository relationships with D3 force graph" />
+        <NavCard to="/analytics"     label="Analytics"     sub="Time-series PR and issue velocity — weekly and monthly trends" />
+        <NavCard to="/governance"    label="Governance"    sub="Dead issues, zombie PRs, risky repos, license compliance" />
+        <NavCard to="/settings"      label="Settings"      sub="PAT authentication, API quota monitoring, cache management" />
+      </div>
+    </div>
+  )
+}
