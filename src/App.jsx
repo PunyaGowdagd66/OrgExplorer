@@ -11,6 +11,7 @@ import NetworkPage     from './pages/NetworkPage'
 import AnalyticsPage   from './pages/AnalyticsPage'
 import GovernancePage  from './pages/GovernancePage'
 import SettingsPage    from './pages/SettingsPage'
+import Footer from './components/layout/Footer'
 
 function Layout({ children }) {
   return (
@@ -18,19 +19,7 @@ function Layout({ children }) {
       <Navbar />
       <RateLimitBanner />
       <main style={{ flex: 1 }}>{children}</main>
-      <footer style={{
-        padding: '18px 24px',
-        borderTop: '1px solid var(--border)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        fontSize: 11,
-        color: 'var(--text3)',
-        letterSpacing: '.04em',
-        marginTop: 40,
-      }}>
-        <span>V2.0.0 · GITHUB · DOCUMENTATION · TERMS</span>
-        <span>2026 ORGEXPLORER · BUILT BY RITIK</span>
-      </footer>
+      <Footer />
     </div>
   )
 }

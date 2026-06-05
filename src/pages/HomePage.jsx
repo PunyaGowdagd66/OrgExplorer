@@ -4,7 +4,7 @@ import { FiSearch, FiX } from 'react-icons/fi'
 import { useApp } from '../context/AppContext'
 import { C, Spinner } from '../components/UI'
 
-const QUICK = ['AOSSIE-Org', 'vercel', 'facebook', 'microsoft']
+const QUICK = ['AOSSIE-Org', 'DjedAlliance', 'StabilityNexus']
 
 export default function HomePage() {
   const { explore, loading, loadMsg, error } = useApp()
