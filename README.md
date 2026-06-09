@@ -325,8 +325,6 @@ Open source grows because of people like you.
 
 ---
 
-## 💪Thanks To All Contributors
-
 Thanks a lot for spending your time helping Resonate grow. Keep rocking 🥂
 
 <a href="https://github.com/AOSSIE-Org/OrgExplorer/graphs/contributors">
