@@ -247,60 +247,59 @@ export default function ContributorsPage() {
                   <SortTh label="Repos Contributed To" sortKey="repos" sortConfig={sortConfig} onSort={onSort} />
                   <SortTh label="Orgs" sortKey="orgs" sortConfig={sortConfig} onSort={onSort} />
                   <SortTh label="Last Active" sortKey="lastActive" sortConfig={sortConfig} onSort={onSort} />
-                  <th style={{ padding: '10px 14px', fontSize: 11, color: 'var(--text2)', fontWeight: 600, background: 'var(--surface2)', borderBottom: '1px solid var(--border)', textAlign: 'left' }}>
-                    <th
-                      style={{ padding: '10px 14px', fontSize: 11, color: 'var(--text2)', fontWeight: 600, background: 'var(--surface2)', textAlign: 'left', position: 'relative' }}
-                      ref={signalRef}
+                  {/* <th style={{ padding: '10px 14px', fontSize: 11, color: 'var(--text2)', fontWeight: 600, background: 'var(--surface2)', borderBottom: '1px solid var(--border)', textAlign: 'left' }}> */}
+                  <th
+                    style={{ padding: '10px 14px', fontSize: 11, color: 'var(--text2)', fontWeight: 600, background: 'var(--surface2)', borderBottom: '1px solid var(--border)', textAlign: 'left', position: 'relative' }}
+                    ref={signalRef}
+                  >
+                    <div
+                      className="flex items-center gap-2"
+                      style={{ position: 'relative' }}
                     >
-                      <div
-                        className="flex items-center gap-2"
-                        style={{ position: 'relative' }}
+                      <p>SIGNALS</p>
+
+                      <button
+                        onClick={() =>
+                          setOpenInfo(openInfo === 'signals' ? null : 'signals')
+                        }
+                        className="p-2 rounded-full hover:bg-zinc-800 transition"
                       >
-                        <p>SIGNALS</p>
+                        <BsFillInfoSquareFill className="text-white cursor-pointer" />
+                      </button>
 
-                        <button
-                          onClick={() =>
-                            setOpenInfo(openInfo === 'signals' ? null : 'signals')
-                          }
-                          className="p-2 rounded-full hover:bg-zinc-800 transition"
+                      {openInfo === 'signals' && (
+                        <div
+                          style={{
+                            ...C.card,
+                            position: 'absolute',
+                            top: '130%',
+                            right: 2,
+                            width: '320px',
+                            zIndex: 100,
+                          }}
                         >
-                          <BsFillInfoSquareFill className="text-white cursor-pointer" />
-                        </button>
+                          <h4 className='mb-2 text-(--accent)'>Contributor Signals</h4>
 
-                        {openInfo === 'signals' && (
-                          <div
-                            style={{
-                              ...C.card,
-                              position: 'absolute',
-                              top: '130%',
-                              right: 2,
-                              width: '320px',
-                              zIndex: 100,
-                            }}
-                          >
-                            <h4 className='mb-2 text-(--accent)'>Contributor Signals</h4>
-
-                            <div className="text-(--text) text-xs">
-                              <p>
-                                Measures how contributors connect repositories and organizations.
-                              </p>
-
-                              <ul className="ml-2 mt-2">
-                                <li>
-                                  <strong>Connector Contributors</strong> — active in 3+ repositories.
-                                </li>
-                                <li>
-                                  <strong>Cross-Org Contributors</strong> — contribute across multiple organizations.
-                                </li>
-                              </ul></div>
-
-                            <p style={{ marginTop: 8 }}>
-                              Higher values indicate stronger collaboration and knowledge sharing.
+                          <div className="text-(--text) text-xs">
+                            <p>
+                              Measures how contributors connect repositories and organizations.
                             </p>
-                          </div>
-                        )}
-                      </div>
-                    </th>
+
+                            <ul className="ml-2 mt-2">
+                              <li>
+                                <strong>Connector Contributors</strong> — active in 3+ repositories.
+                              </li>
+                              <li>
+                                <strong>Cross-Org Contributors</strong> — contribute across multiple organizations.
+                              </li>
+                            </ul></div>
+
+                          <p style={{ marginTop: 8 }}>
+                            Higher values indicate stronger collaboration and knowledge sharing.
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </th>
                 </tr>
               </thead>
@@ -353,6 +352,6 @@ export default function ContributorsPage() {
             </div>
           </>)}
       </div>
-    </div>
+    </div >
   )
 }
