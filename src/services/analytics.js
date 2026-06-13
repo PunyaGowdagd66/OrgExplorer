@@ -1,4 +1,4 @@
-//  Repo Health Indicator (Section 3.2.6)
+//  Repo Health Indicator
 // Activity (40%) + Issue Health (30%) + Diversity (30%)
 export function computeHealthScore(repo, contributorCount = 0) {
   const daysSince   = (Date.now() - new Date(repo.pushed_at)) / 86_400_000
@@ -9,16 +9,16 @@ export function computeHealthScore(repo, contributorCount = 0) {
   return Math.round(activity * 0.4 + issueHealth * 0.3 + diversity * 0.3)
 }
 
-// Repo Lifecycle (Section 3.2.6) — Thriving, Stable, Dormant, Abandoned based on recency of last push
-export function computeLifecycle(repo) {
+// Repo Lifecycle — Thriving, Active, Dormant, Hibernating based on recency of last push
+export function computeActivityClassification(repo) {
   const days = (Date.now() - new Date(repo.pushed_at)) / 86_400_000
   if (days <= 30)  return 'Thriving'
-  if (days <= 90)  return 'Stable'
+  if (days <= 90)  return 'Active'
   if (days <= 180) return 'Dormant'
-  return 'Abandoned'
+  return 'Hibernating'
 }
 
-//  Bus Factor (Section 3.2.6)
+//  Bus Factor
 export function computeBusFactor(contributors = []) {
   if (!contributors.length) return { factor: 0, risk: 'unknown' }
   const total = contributors.reduce((s, c) => s + c.contributions, 0)
@@ -34,9 +34,9 @@ export function computeBusFactor(contributors = []) {
   return { factor: contributors.length, risk: 'healthy' }
 }
 
-// Unified Analytical Data Model (Section 3.2.0)
+// Unified Analytical Data Model
 // Merges multiple orgs into one normalized graph:
-//   Organization → Repositories → Contributors → Issues/PRs
+// Organization → Repositories → Contributors → Issues/PRs
 export function buildAnalyticalModel(orgs, reposPerOrg, contribsPerRepo) {
   const allRepos      = []
   const contributorMap = {}
@@ -48,9 +48,9 @@ export function buildAnalyticalModel(orgs, reposPerOrg, contribsPerRepo) {
       const key     = `${org.login}/${repo.name}`
       const contribs = contribsPerRepo[key] || []
       const health  = computeHealthScore(repo, contribs.length)
-      const lc      = computeLifecycle(repo)
+      const activityClassification  = computeActivityClassification(repo)
       const bf      = computeBusFactor(contribs)
-      allRepos.push({ ...repo, orgLogin: org.login, contributors: contribs, healthScore: health, lifecycle: lc, busFactor: bf })
+      allRepos.push({ ...repo, orgLogin: org.login, contributors: contribs, healthScore: health, activityClassification: activityClassification, busFactor: bf })
 
       // Build contributor map — deduplicated by login across orgs
       contribs.forEach(c => {
@@ -86,11 +86,11 @@ export function buildAnalyticalModel(orgs, reposPerOrg, contribsPerRepo) {
       : 0,
   })).sort((a, b) => b.totalContribs - a.totalContribs)
 
-  // Graph is constructed here and persisted through cache layers (Section 3.2.0)
+  // Graph is constructed here and persisted through cache layers
   return { allRepos, contributors }
 }
 
-// Time-Series Bucketing (Section 3.2.9)
+// Time-Series Bucketing
 // Parses created_at, closed_at, merged_at into weekly/monthly bins
 export function buildTimeSeries(issues = [], granularity = 'monthly') {
   const buckets = {}
@@ -142,7 +142,7 @@ export function buildTimeSeries(issues = [], granularity = 'monthly') {
     .slice(-12)
 }
 
-// CSV Export (Section 3.2.9)
+// CSV Export
 function download(content, filename, type = 'text/csv') {
   const blob = new Blob([content], { type })
   const url  = URL.createObjectURL(blob)
@@ -152,8 +152,8 @@ function download(content, filename, type = 'text/csv') {
 }
 
 export function exportReposCSV(repos) {
-  const header = ['Repository','Org','Stars','Forks','Open Issues','Health Score','Lifecycle','Language','Last Active']
-  const rows   = repos.map(r => [r.name, r.orgLogin, r.stargazers_count, r.forks_count, r.open_issues_count, r.healthScore, r.lifecycle, r.language || 'N/A', r.pushed_at?.slice(0, 10)])
+  const header = ['Repository','Org','Stars','Forks','Open Issues','Health Score','Activity Classification','Language','Last Active']
+  const rows   = repos.map(r => [r.name, r.orgLogin, r.stargazers_count, r.forks_count, r.open_issues_count, r.healthScore, r.activityClassification, r.language || 'N/A', r.pushed_at?.slice(0, 10)])
   download([header, ...rows].map(r => r.join(',')).join('\n'), 'orgexplorer-repos.csv')
 }
 

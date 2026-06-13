@@ -32,7 +32,7 @@ export default function OverviewPage() {
   const isMulti = orgs.length > 1
   const totalStars = allRepos.reduce((s, r) => s + r.stargazers_count, 0)
   const totalForks = allRepos.reduce((s, r) => s + r.forks_count, 0)
-  const activeRepos = allRepos.filter(r => r.lifecycle === 'Thriving' || r.lifecycle === 'Stable').length
+  const activeRepos = allRepos.filter(r => r.activityClassification === 'Thriving' || r.activityClassification === 'Active').length
 
   const langMap = {}
   allRepos.forEach(r => { if (r.language) langMap[r.language] = (langMap[r.language] || 0) + 1 })
@@ -183,7 +183,7 @@ export default function OverviewPage() {
 
       {/* Nav cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14 }}>
-        <NavCard to="/repositories" label="Repositories" sub="Explore and sort repos by health, activity, and lifecycle state" />
+        <NavCard to="/repositories" label="Repositories" sub="Explore and sort repos by health, and activity classification state" />
         <NavCard to="/contributors" label="Contributors" sub="Analyze contribution patterns, bus factor, and connector signals" />
         <NavCard to="/network" label="Network Graph" sub="Visualize contributor-repository relationships with D3 force graph" />
         <NavCard to="/analytics" label="Analytics" sub="Time-series PR and issue velocity — weekly and monthly trends" />
