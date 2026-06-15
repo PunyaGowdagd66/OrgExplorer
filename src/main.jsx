@@ -6,7 +6,7 @@ import './styles/global.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter  basename={import.meta.env.PROD ? "/OrgExplorer" : "/"}>
+    <BrowserRouter  basename= "/">
       <App />
     </BrowserRouter>
   </React.StrictMode>
