@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://aossie-org.github.io/OrgExplorer/sitemap.xml
+Sitemap: https://orgexplorer.aossie.org/sitemap.xml
