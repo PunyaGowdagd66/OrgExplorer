@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { FiDatabase, FiDownload, FiGrid, FiList } from 'react-icons/fi'
-import { BsFillInfoSquareFill } from "react-icons/bs";
+import { AiOutlineInfoCircle } from "react-icons/ai";
 import { useApp } from '../context/AppContext'
 import { C, Badge, HealthBar, SortTh, PageTitle, LoadMore } from '../components/UI'
 import { useSortedData } from '../hooks/useSortedData'
@@ -15,8 +15,7 @@ export default function RepositoriesPage() {
   const { model } = useApp()
   const [search, setSearch] = useState('')
   const [activityClassification, setActivityClassification] = useState('All')
-  const [lang, setLang] = useState('All')
-  const [view, setView] = useState('grid')
+  const [lang, setLang] = useState('All Languages')
   const [shown, setShown] = useState(20)
   const [openInfo, setOpenInfo] = useState(false)
   const infoRef = useRef(null)
@@ -41,12 +40,12 @@ export default function RepositoriesPage() {
   const { allRepos } = model
 
   const langs = useMemo(() =>
-    ['All', ...new Set(allRepos.map(r => r.language).filter(Boolean))].slice(0, 10),
+    ['All Languages', ...new Set(allRepos.map(r => r.language).filter(Boolean))].slice(0, 10),
     [allRepos])
 
   const filtered = useMemo(() => allRepos.filter(r =>
     (activityClassification === 'All' || r.activityClassification === activityClassification) &&
-    (lang === 'All' || r.language === lang) &&
+    (lang === 'All Languages' || r.language === lang) &&
     (!search || r.name.toLowerCase().includes(search.toLowerCase()) ||
       (r.description || '').toLowerCase().includes(search.toLowerCase()))
   ), [allRepos, activityClassification, lang, search])
@@ -60,8 +59,7 @@ export default function RepositoriesPage() {
     ['forks_count', 'Forks'],
     ['open_issues_count', 'Open Issues'],
     ['healthScore', 'Health'],
-    ['activityClassification', 'Activity Classification'],
-    ['pushed_at', 'Last Push'],
+    ['pushed_at', 'Repository Activity'],
   ]
 
   return (
@@ -73,10 +71,11 @@ export default function RepositoriesPage() {
               Repository Explorer
 
               <button
-                onClick={() => setOpenInfo(prev => !prev)}
-                className="p-3 rounded-full hover:bg-zinc-800 transition"
+                onMouseEnter={()=>setOpenInfo(true)}
+                onMouseLeave={()=>setOpenInfo(false)}
+                className="p-3 rounded-full hover:bg-(--bg) transition"
               >
-                <BsFillInfoSquareFill className='size-4' />
+                <AiOutlineInfoCircle className="text-(--text) cursor-pointer" />
               </button>
             </div>
           }
@@ -159,14 +158,6 @@ export default function RepositoriesPage() {
           <select value={lang} onChange={e => setLang(e.target.value)} style={C.select}>
             {langs.map(l => <option key={l}>{l}</option>)}
           </select>
-          <div style={{ display: 'flex', gap: 4 }}>
-            <button onClick={() => setView('grid')} style={{ ...C.btn(view === 'grid' ? 'primary' : 'ghost'), padding: '7px 11px', display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}>
-              <FiGrid size={13} /> Grid
-            </button>
-            <button onClick={() => setView('list')} style={{ ...C.btn(view === 'list' ? 'primary' : 'ghost'), padding: '7px 11px', display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}>
-              <FiList size={13} /> Table
-            </button>
-          </div>
           <button onClick={() => exportReposCSV(filtered)} style={{ ...C.btn('ghost'), padding: '7px 12px', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12 }}>
             <FiDownload size={13} /> CSV
           </button>
@@ -190,7 +181,6 @@ export default function RepositoriesPage() {
       {allRepos?.length ? (
         <>
           {/* Table view */}
-          {view === 'list' && (
             <div style={{ ...C.card, padding: 0, overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
@@ -203,77 +193,37 @@ export default function RepositoriesPage() {
                 <tbody>
                   {visible.map((r, i) => (
                     <tr key={r.id} style={{ borderBottom: '1px solid var(--border)', background: i % 2 ? 'var(--surface2)' : 'transparent' }}>
-                      <td style={{ padding: '10px 14px' }}>
+                    <td style={{ padding: '10px 14px' }}>
+                      <a
+                        href={`${r.html_url}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          textDecoration: 'none',
+                          color: 'inherit',
+                        }}
+                      >
                         <div style={{ fontWeight: 500, fontSize: 13 }}>{r.name}</div>
                         {r.orgLogin && <div style={{ fontSize: 11, color: 'var(--text2)' }}>{r.orgLogin}</div>}
-                      </td>
+                      </a>
+                    </td>
                       <td style={{ padding: '10px 14px', fontSize: 13, color: 'var(--text2)' }}>{r.stargazers_count.toLocaleString()}</td>
                       <td style={{ padding: '10px 14px', fontSize: 13, color: 'var(--text2)' }}>{r.forks_count.toLocaleString()}</td>
                       <td style={{ padding: '10px 14px', fontSize: 13, color: r.open_issues_count > 30 ? 'var(--red)' : 'var(--text2)' }}>{r.open_issues_count}</td>
                       <td style={{ padding: '10px 14px', minWidth: 130 }}><HealthBar score={r.healthScore} /></td>
-                      <td style={{ padding: '10px 14px' }}><Badge text={r.activityClassification} /></td>
-                      <td style={{ padding: '10px 14px', fontSize: 12, color: 'var(--text2)' }}>{r.pushed_at?.slice(0, 10)}</td>
-                    </tr>
+                      <td style={{ padding: '10px 14px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}><Badge text={r.activityClassification} />
+                          <span style={{ fontSize: 11, color: 'var(--text2)' }}>
+                            Last push: {r.pushed_at?.slice(0, 10)}
+                          </span>
+                        </div>
+                      </td>
+                    </tr> 
                   ))}
                 </tbody>
               </table>
               <LoadMore shown={shown} total={sorted.length} onLoad={() => setShown(s => s + 20)} />
             </div>
-          )}
-
-          {/* Grid view */}
-          {view === 'grid' && (
-            <>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: 16 }}>
-                {visible.map(r => (
-                  <div
-                    key={r.id}
-                    onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
-                    onMouseLeave={e => e.currentTarget.style.borderColor = ACTIVITY_COLORS[r.activityClassification]}
-                    style={{
-                      ...C.card,
-                      borderColor: ACTIVITY_COLORS[r.activityClassification],
-                      transition: 'border-color .2s', display: 'flex', flexDirection: 'column', gap: 10,
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <div>
-                        <div style={{ fontWeight: 600, fontSize: 14 }}>{r.name}</div>
-                        {r.orgLogin && <div style={{ fontSize: 11, color: 'var(--text2)' }}>{r.orgLogin}</div>}
-                      </div>
-                      <Badge text={r.activityClassification} />
-                    </div>
-                    <p style={{ fontSize: 12, color: 'var(--text2)', minHeight: 34, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                      {r.description || 'No description provided'}
-                    </p>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', textAlign: 'center', gap: 4 }}>
-                      {[['Stars', r.stargazers_count.toLocaleString()], ['Forks', r.forks_count.toLocaleString()], ['Issues', r.open_issues_count]].map(([l, v]) => (
-                        <div key={l}>
-                          <div style={{ fontSize: 14, fontWeight: 600 }}>{v}</div>
-                          <div style={{ ...C.label, fontSize: 10 }}>{l}</div>
-                        </div>
-                      ))}
-                    </div>
-                    {r.language && (
-                      <div style={{ fontSize: 12, color: 'var(--text2)', display: 'flex', alignItems: 'center', gap: 5 }}>
-                        <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: 'var(--green)' }} />
-                        {r.language}
-                      </div>
-                    )}
-                    <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text2)', marginBottom: 4 }}>
-                        <span>HEALTH SCORE</span>
-                        <span>{r.pushed_at?.slice(0, 10)}</span>
-                      </div>
-                      <HealthBar score={r.healthScore} />
-                    </div>
-                    <div style={{ ...C.label, fontSize: 10 }}>ACTIVITY 40% · ISSUES 30% · DIVERSITY 30%</div>
-                  </div>
-                ))}
-              </div>
-              <LoadMore shown={shown} total={sorted.length} onLoad={() => setShown(s => s + 20)} />
-            </>
-          )}
         </>)
         : (
           <div
