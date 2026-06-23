@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { FiExternalLink, FiShare2, FiArrowRight } from 'react-icons/fi'
 import { useApp } from '../context/AppContext'
 import { C, StatCard, HealthBar } from '../components/UI'
-import { BsFillInfoSquareFill } from "react-icons/bs";
 import SocialShareButton from '../components/SocialShareButton';
+import { AiOutlineInfoCircle } from "react-icons/ai";
+
 
 const LANG_COLORS = ['#22c55e', '#f5c518', '#3b82f6', '#ef4444', '#a855f7', '#f97316', '#06b6d4']
 const fmt = n => n > 999 ? (n / 1000).toFixed(1) + 'k' : String(n)
@@ -138,16 +139,17 @@ export default function OverviewPage() {
             <p>High Impact Repositories</p>
 
             <button
-              onClick={() => setOpen(prev => !prev)}
-              className="p-3 rounded-full hover:bg-zinc-800 transition"
+              onMouseEnter={()=>setOpen(true)}
+              onMouseLeave={()=>setOpen(false)}
+              className="p-3 rounded-full hover:bg-(--bg) transition"
             >
-              <BsFillInfoSquareFill />
+              <AiOutlineInfoCircle className="text-(--text) cursor-pointer" />
             </button>
           </div>
 
           {open && (
             <div
-              className="absolute top-16 right-2 w-80 z-50 rounded-lg border-2 border-(--border) bg-zinc-900 p-4 shadow-xl text-xs"
+              className="absolute top-16 right-2 w-80 z-50 rounded-lg border-2 border-(--border) bg-(--surface) p-4 shadow-xl text-xs"
             >
               <strong>Health Score</strong> estimates the overall health of a repository on a scale of 0 – 100.
 
@@ -163,7 +165,7 @@ export default function OverviewPage() {
                 </li>
               </ul>
 
-              <p className="mt-2 text-zinc-400">
+              <p className="mt-2 text-xs text-(--text2)">
                 Higher scores indicate healthier and more actively maintained repositories.
               </p>
             </div>

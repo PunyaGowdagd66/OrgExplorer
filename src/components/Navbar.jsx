@@ -22,7 +22,7 @@ export default function Navbar() {
   return (
     <nav style={{
       position: 'sticky', top: 0, zIndex: 100,
-      background: 'rgba(13,13,13,.97)',
+      background: 'var(--bg)',
       backdropFilter: 'blur(10px)',
       borderBottom: '1px solid var(--border)',
       padding: '0 24px',
