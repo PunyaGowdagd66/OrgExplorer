@@ -6,7 +6,7 @@ import { useSortedData } from '../hooks/useSortedData'
 import { computeBusFactor, exportContributorsCSV } from '../services/analytics'
 import { useNavigate } from 'react-router-dom'
 import EmptyStateCard from '../components/EmptyStateCard'
-import { BsFillInfoSquareFill } from "react-icons/bs";
+import { AiOutlineInfoCircle } from "react-icons/ai";
 
 export default function ContributorsPage() {
   const { model } = useApp()
@@ -90,12 +90,11 @@ export default function ContributorsPage() {
             <p>Bus Factor Risk</p>
 
             <button
-              onClick={() =>
-                setOpenInfo(openInfo === 'busfactor' ? null : 'busfactor')
-              }
-              className="p-2 rounded-full hover:bg-zinc-800 transition"
+              onMouseEnter={()=>setOpenInfo("busfactor")}
+              onMouseLeave={()=>setOpenInfo(null)}
+              className="p-2 rounded-full hover:bg-(--bg) transition"
             >
-              <BsFillInfoSquareFill className="text-white cursor-pointer" />
+              <AiOutlineInfoCircle className="text-(--text) cursor-pointer" />
             </button>
 
             {openInfo === 'busfactor' && (
@@ -152,12 +151,11 @@ export default function ContributorsPage() {
             <p>Freshness Index</p>
 
             <button
-              onClick={() =>
-                setOpenInfo(openInfo === 'freshness' ? null : 'freshness')
-              }
-              className="p-2 rounded-full hover:bg-zinc-800 transition"
+              onMouseEnter={()=>setOpenInfo("freshness")}
+              onMouseLeave={()=>setOpenInfo(null)}
+              className="p-2 rounded-full hover:bg-(--bg) transition"
             >
-              <BsFillInfoSquareFill className="text-white cursor-pointer" />
+              <AiOutlineInfoCircle className="text-(--text) cursor-pointer" />
             </button>
 
             {openInfo === 'freshness' && (
@@ -258,12 +256,11 @@ export default function ContributorsPage() {
                       <p>SIGNALS</p>
 
                       <button
-                        onClick={() =>
-                          setOpenInfo(openInfo === 'signals' ? null : 'signals')
-                        }
-                        className="p-2 rounded-full hover:bg-zinc-800 transition"
+                        onMouseEnter={()=>setOpenInfo("signals")}
+                        onMouseLeave={()=>setOpenInfo(null)}
+                        className="p-2 rounded-full hover:bg-(--bg) transition"
                       >
-                        <BsFillInfoSquareFill className="text-white cursor-pointer" />
+                        <AiOutlineInfoCircle className="text-(--text) cursor-pointer" />
                       </button>
 
                       {openInfo === 'signals' && (
@@ -306,10 +303,23 @@ export default function ContributorsPage() {
                 {visible.map((c, i) => (
                   <tr key={c.login} style={{ borderBottom: '1px solid var(--border)', background: i % 2 ? 'var(--surface2)' : 'transparent' }}>
                     <td style={{ padding: '10px 14px' }}>
+                      <a
+                        href={`https://github.com/${c.login}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 8,
+                          textDecoration: 'none',
+                          color: 'inherit',
+                        }}
+                      >
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <img src={c.avatar_url} alt={c.login} style={{ width: 28, height: 28, borderRadius: '50%' }} />
                         <span style={{ fontSize: 13, fontWeight: 500 }}>{c.login}</span>
                       </div>
+                      </a>
                     </td>
                     <td style={{ padding: '10px 14px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
