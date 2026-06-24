@@ -11,7 +11,7 @@ const LANG_COLORS = ['#22c55e', '#f5c518', '#3b82f6', '#ef4444', '#a855f7', '#f9
 const fmt = n => n > 999 ? (n / 1000).toFixed(1) + 'k' : String(n)
 
 export default function OverviewPage() {
-  const { orgs, model } = useApp()
+  const { orgs, model, totalRepo } = useApp()
   const navigate = useNavigate()
   if (!model) return null
 
@@ -103,10 +103,10 @@ export default function OverviewPage() {
 
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 24 }}>
-        <StatCard label="Total Repos" value={allRepos.length.toLocaleString()} />
+        <StatCard label="Total Repos" value={totalRepo.toLocaleString()} />
         <StatCard label="Total Stars" value={fmt(totalStars)} />
         <StatCard label="Total Forks" value={fmt(totalForks)} />
-        <StatCard label="Active Repos" value={activeRepos} sub={`${Math.round(activeRepos / allRepos.length * 100)}% of total`} />
+        <StatCard label="Active Repos" value={activeRepos} sub={`${Math.round(activeRepos / totalRepo * 100)}% of total`} />
       </div>
 
       {/* Language + top repos */}

@@ -58,7 +58,7 @@ export function AppProvider({ children }) {
 
     return () => clearTimeout(timeout)
   }, [rateLimit])
-
+  const [totalRepo, setTotalRepo] = useState(0);
   const savePat = useCallback(token => {
     setPat(token)
     token ? localStorage.setItem('oe_pat', token) : localStorage.removeItem('oe_pat')
@@ -79,6 +79,13 @@ export function AppProvider({ children }) {
       await Promise.allSettled(validOrgs.map(async org => {
         reposPerOrg[org.login] = await fetchRepos(org.login, pat)
       }))
+
+      const total = Object.values(reposPerOrg).reduce(
+        (sum, repos) => sum + repos.length,
+        0
+      );
+
+      setTotalRepo(total);
 
       setLoadMsg('Fetching contributor data for top repositories...')
       const contribsPerRepo = {}
@@ -130,7 +137,7 @@ export function AppProvider({ children }) {
   return (
     <Ctx.Provider value={{
       pat, savePat, orgs, model, issuesData,
-      rateLimit, loading, loadMsg, govLoading, error,
+      rateLimit, loading, loadMsg, govLoading, error, totalRepo,
       explore, runAudit, setError,
     }}>
       {children}
