@@ -14,11 +14,6 @@ export default function GovernancePage() {
   const { model, issuesData, runAudit, govLoading } = useApp()
   const [tab, setTab] = useState('dead')
 
-  if (!model) return null
-
-  const hasAudit = Object.keys(issuesData || {}).length > 0
-  const daysSince = d => Math.floor((Date.now() - new Date(d)) / 86_400_000)
-
   // Flatten all issues and tag with repo/org
   const allIssues = useMemo(() => {
     const arr = []
@@ -28,6 +23,11 @@ export default function GovernancePage() {
     })
     return arr
   }, [issuesData])
+
+  if (!model) return null
+
+  const hasAudit = Object.keys(issuesData || {}).length > 0
+  const daysSince = d => Math.floor((Date.now() - new Date(d)) / 86_400_000)
 
   // Health check 1 — Dead Issues (>90 days open, not a PR)
   const deadIssues = allIssues

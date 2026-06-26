@@ -12,8 +12,6 @@ const fmt = n => n > 999 ? (n / 1000).toFixed(1) + 'k' : String(n)
 export default function OverviewPage() {
   const { orgs, model } = useApp()
   const navigate = useNavigate()
-  if (!model) return null
-
   const [open, setOpen] = useState(false)
   const infoRef = useRef(null)
 
@@ -28,6 +26,8 @@ export default function OverviewPage() {
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [])
+
+  if (!model) return null
 
   const { allRepos } = model
   const isMulti = orgs.length > 1

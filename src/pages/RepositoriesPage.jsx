@@ -37,8 +37,7 @@ export default function RepositoriesPage() {
   }, [])
 
   const navigate = useNavigate()
-  if (!model) return null
-  const { allRepos } = model
+  const allRepos = model?.allRepos ?? []
 
   const langs = useMemo(() =>
     ['All', ...new Set(allRepos.map(r => r.language).filter(Boolean))].slice(0, 10),
@@ -53,6 +52,8 @@ export default function RepositoriesPage() {
 
   const { sorted, sortConfig, onSort } = useSortedData(filtered, 'healthScore', 'desc')
   const visible = sorted.slice(0, shown)
+
+  if (!model) return null
 
   const TABLE_COLS = [
     ['name', 'Repository'],

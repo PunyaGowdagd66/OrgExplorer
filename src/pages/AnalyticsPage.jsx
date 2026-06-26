@@ -24,11 +24,6 @@ export default function AnalyticsPage() {
   const [granularity,   setGranularity]   = useState('monthly')
   const [selectedRepo,  setSelectedRepo]  = useState('All')
 
-  if (!model) return null
-
-  const repoNames = ['All', ...model.allRepos.slice(0, 12).map(r => r.name)]
-  const hasData   = Object.keys(issuesData || {}).length > 0
-
   const allIssues = useMemo(() => {
     const arr = []
     Object.values(issuesData || {}).forEach(issues => arr.push(...issues))
@@ -46,6 +41,10 @@ export default function AnalyticsPage() {
     [filteredIssues, granularity]
   )
 
+  if (!model) return null
+
+  const repoNames = ['All', ...model.allRepos.slice(0, 12).map(r => r.name)]
+  const hasData   = Object.keys(issuesData || {}).length > 0
   const hasSeries = series.length > 0
 
   return (

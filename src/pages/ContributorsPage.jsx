@@ -43,15 +43,10 @@ export default function ContributorsPage() {
       document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  if (!model) return null
-  const { contributors } = model
   const navigate = useNavigate()
+  const contributors = model?.contributors ?? []
 
   const busFactor = useMemo(() => computeBusFactor(contributors), [contributors])
-  const topActive = contributors.slice(0, 10).filter(c => c.freshness > 50).length
-  const freshPct = contributors.length ? Math.round(topActive / Math.min(10, contributors.length) * 100) : 0
-  const connectors = contributors.filter(c => c.isConnector)
-  const crossOrg = contributors.filter(c => c.isCrossOrg)
 
   const filtered = useMemo(() =>
     contributors.filter(c => !search || c.login.toLowerCase().includes(search.toLowerCase())),
@@ -59,6 +54,13 @@ export default function ContributorsPage() {
 
   const { sorted, sortConfig, onSort } = useSortedData(filtered, 'totalContribs', 'desc')
   const visible = sorted.slice(0, shown)
+
+  if (!model) return null
+
+  const topActive = contributors.slice(0, 10).filter(c => c.freshness > 50).length
+  const freshPct = contributors.length ? Math.round(topActive / Math.min(10, contributors.length) * 100) : 0
+  const connectors = contributors.filter(c => c.isConnector)
+  const crossOrg = contributors.filter(c => c.isCrossOrg)
 
   const riskColor = r => r === 'critical' ? 'var(--red)' : r === 'high' ? 'var(--amber)' : 'var(--green)'
   const riskBar = r => r === 'critical' ? '90%' : r === 'high' ? '60%' : '25%'
