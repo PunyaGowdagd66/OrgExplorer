@@ -30,18 +30,18 @@ export default function OverviewPage() {
 
   if (!model) return null
 
-  const { allRepos } = model
+  const { totalRepos } = model
   const isMulti = orgs.length > 1
-  const totalStars = allRepos.reduce((s, r) => s + r.stargazers_count, 0)
-  const totalForks = allRepos.reduce((s, r) => s + r.forks_count, 0)
-  const activeRepos = allRepos.filter(r => r.activityClassification === 'Thriving' || r.activityClassification === 'Active').length
+  const totalStars = totalRepos.reduce((s, r) => s + r.stargazers_count, 0)
+  const totalForks = totalRepos.reduce((s, r) => s + r.forks_count, 0)
+  const activeRepos = totalRepos.filter(r => r.activityClassification === 'Thriving' || r.activityClassification === 'Active').length
 
   const langMap = {}
-  allRepos.forEach(r => { if (r.language) langMap[r.language] = (langMap[r.language] || 0) + 1 })
+  totalRepos.forEach(r => { if (r.language) langMap[r.language] = (langMap[r.language] || 0) + 1 })
   const langs = Object.entries(langMap).sort((a, b) => b[1] - a[1]).slice(0, 7)
   const langTotal = langs.reduce((s, [, c]) => s + c, 0)
 
-  const topRepos = [...allRepos].sort((a, b) => b.healthScore - a.healthScore).slice(0, 5)
+  const topRepos = [...totalRepos].sort((a, b) => b.healthScore - a.healthScore).slice(0, 5)
 
   const NavCard = ({ to, label, sub }) => (
     <div

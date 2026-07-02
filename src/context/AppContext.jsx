@@ -86,6 +86,12 @@ export function AppProvider({ children }) {
       );
 
       setTotalRepo(total);
+      const totalReposPerOrg = Object.fromEntries(
+        Object.entries(reposPerOrg).map(([org, repos]) => [
+          org,
+          [...repos], // copy each array
+        ])
+      );
 
       setLoadMsg('Fetching contributor data for top repositories...')
       const contribsPerRepo = {}
@@ -100,7 +106,7 @@ export function AppProvider({ children }) {
       }
 
       setLoadMsg('Building analytical data model...')
-      setModel(buildAnalyticalModel(validOrgs, reposPerOrg, contribsPerRepo))
+      setModel(buildAnalyticalModel(validOrgs, reposPerOrg, contribsPerRepo, totalReposPerOrg))
 
 
       // Save to recent searches
