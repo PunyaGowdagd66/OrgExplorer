@@ -27,7 +27,7 @@ export default function NetworkPage() {
     svg.attr('viewBox', `0 0 ${W} ${H}`)
 
     // Top repos and contributors for performance
-    const topRepos    = model.allRepos
+    const topRepos    = model.allRepos.slice(0, 30)
     const topContribs = model.contributors
 
     const nodes = []
