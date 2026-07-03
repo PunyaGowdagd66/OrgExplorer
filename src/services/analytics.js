@@ -37,20 +37,28 @@ export function computeBusFactor(contributors = []) {
 // Unified Analytical Data Model
 // Merges multiple orgs into one normalized graph:
 // Organization → Repositories → Contributors → Issues/PRs
-export function buildAnalyticalModel(orgs, reposPerOrg, contribsPerRepo) {
+export function buildAnalyticalModel(orgs, reposPerOrg, contribsPerRepo, totalReposPerOrg) {
   const allRepos      = []
   const contributorMap = {}
+  const totalRepos = [];
 
   orgs.forEach(org => {
     const repos = reposPerOrg[org.login] || []
+    const total = totalReposPerOrg[org.login] || [];
+
+    total.forEach(repo => {
+      const key = `${org.login}/${repo.name}`
+      const contribs = contribsPerRepo[key] || []
+      const health = computeHealthScore(repo, contribs.length)
+      const activityClassification = computeActivityClassification(repo)
+      const bf = computeBusFactor(contribs)
+      totalRepos.push({ ...repo, orgLogin: org.login, contributors: contribs, healthScore: health, activityClassification: activityClassification, busFactor: bf })
+    })
 
     repos.forEach(repo => {
-      const key     = `${org.login}/${repo.name}`
+      const key = `${org.login}/${repo.name}`
       const contribs = contribsPerRepo[key] || []
-      const health  = computeHealthScore(repo, contribs.length)
-      const activityClassification  = computeActivityClassification(repo)
-      const bf      = computeBusFactor(contribs)
-      allRepos.push({ ...repo, orgLogin: org.login, contributors: contribs, healthScore: health, activityClassification: activityClassification, busFactor: bf })
+      allRepos.push({ ...repo, orgLogin: org.login });
 
       // Build contributor map — deduplicated by login across orgs
       contribs.forEach(c => {
@@ -87,7 +95,7 @@ export function buildAnalyticalModel(orgs, reposPerOrg, contribsPerRepo) {
   })).sort((a, b) => b.totalContribs - a.totalContribs)
 
   // Graph is constructed here and persisted through cache layers
-  return { allRepos, contributors }
+  return { allRepos, contributors, totalRepos }
 }
 
 // Time-Series Bucketing

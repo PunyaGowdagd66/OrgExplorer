@@ -36,7 +36,7 @@ export default function RepositoriesPage() {
   }, [])
 
   const navigate = useNavigate()
-  const allRepos = model?.allRepos ?? []
+  const allRepos = model?.totalRepos ?? []
 
   const langs = useMemo(() =>
     ['All Languages', ...new Set(allRepos.map(r => r.language).filter(Boolean))].slice(0, 10),
