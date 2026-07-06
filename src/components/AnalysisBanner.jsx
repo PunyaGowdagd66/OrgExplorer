@@ -3,6 +3,7 @@ import { FiLock, FiLoader, FiInfo, } from 'react-icons/fi'
 import { IoMdAnalytics } from "react-icons/io";
 import { useApp } from '../context/AppContext'
 import PATModal from './PATModal'
+import LearnMoreModal from './LearnModeModal'
 
 
 export default function AnalysisBanner({ page, description, onRun, loading = false, analysisStatus = 'sample', }) {
@@ -210,6 +211,10 @@ export default function AnalysisBanner({ page, description, onRun, loading = fal
       <PATModal
         open={patModalOpen}
         onClose={() => setPatModalOpen(false)}
+      />
+      <LearnMoreModal
+        open={open}
+        onClose={() => setOpen(false)}
       />
     </>
   )
