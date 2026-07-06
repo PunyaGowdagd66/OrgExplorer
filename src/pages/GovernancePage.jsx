@@ -7,14 +7,52 @@ import AnalysisBanner from '../components/AnalysisBanner'
 const TABS = [
   { key: 'dead',    label: 'Dead Issues' },
   { key: 'zombie',  label: 'Zombie PRs'  },
-  { key: 'risky',   label: 'Risky Repos' },
+  { key: 'stale',   label: 'Stale Issues Ratio' },
   { key: 'license', label: 'No License'  },
 ]
+
+const getStatus = ratio => {
+  if (ratio <= 10)
+    return {
+      label: 'Excellent',
+      color: 'var(--green)',
+      bg: 'rgba(34,197,94,.12)'
+    }
+
+  if (ratio <= 25)
+    return {
+      label: 'Healthy',
+      color: 'var(--amber)',
+      bg: 'rgba(250,204,21,.12)'
+    }
+
+  if (ratio <= 40)
+    return {
+      label: 'Warning',
+      color: 'var(--orange)',
+      bg: 'rgba(251,146,60,.12)'
+    }
+
+  return {
+    label: 'Critical',
+    color: 'var(--red)',
+    bg: 'rgba(239,68,68,.12)'
+  }
+}
 
 export default function GovernancePage() {
   const { model, issuesData, runAudit, govLoading, auditComplete, loading, runGovernanceAnalysis } = useApp()
   const [tab, setTab] = useState('dead')
 
+  const ITEMS_PER_PAGE = 10
+  const [stalePage, setStalePage] = useState(1)
+  const totalPages = Math.ceil(staleRepoStats.length / ITEMS_PER_PAGE)
+
+  const paginatedStaleRepos = useMemo(() => {
+    const start = (stalePage - 1) * ITEMS_PER_PAGE
+    return staleRepoStats.slice(start, start + ITEMS_PER_PAGE)
+  }, [staleRepoStats, stalePage])
+  console.log(paginatedStaleRepos);
   // Flatten all issues and tag with repo/org
   const allIssues = useMemo(() => {
     const arr = []
@@ -35,20 +73,13 @@ export default function GovernancePage() {
     .filter(i => !i.pull_request && daysSince(i.created_at) >= 90)
     .sort((a, b) => daysSince(b.created_at) - daysSince(a.created_at))
 
-  // Health check 2 — Zombie PRs (>90 days open)
+  // Health check 2 — Percentage of dead issues relative to all issues
+  const staleIssuesRatio = allIssues.length ? (deadIssues.length / allIssues.length) * 100 : 0;
+
+  // Health check 3 — Zombie PRs (>90 days open)
   const zombiePRs = allIssues
     .filter(i => i.pull_request && daysSince(i.created_at) >= 90)
     .sort((a, b) => daysSince(b.created_at) - daysSince(a.created_at))
-
-  // Health check 3 — Risky repos (top-2 contributor concentration >80%)
-  const riskyRepos = model.allRepos.filter(r => {
-    const c = r.contributors || []
-    if (!c.length) return false
-    const total = c.reduce((s, x) => s + x.contributions, 0)
-    if (!total) return false
-    const topTwo = (c[0]?.contributions || 0) + (c[1]?.contributions || 0)
-    return topTwo / total > 0.8
-  })
 
   // Health check 4 — No license
   const noLicense = model.allRepos.filter(r => !r.license && !r.archived && !r.fork)
@@ -56,7 +87,7 @@ export default function GovernancePage() {
   // Issue resolution rate per repo
   const topRepos = model.allRepos.slice(0, 8)
 
-  const counts = { dead: deadIssues.length, zombie: zombiePRs.length, risky: riskyRepos.length, license: noLicense.length }
+  const counts = { dead: deadIssues.length, zombie: zombiePRs.length, license: noLicense.length, stale: staleIssuesRatio.toFixed(2) }
 
   // Stat card
   const StatBox = ({ label, value, sub, color }) => (
@@ -132,8 +163,8 @@ export default function GovernancePage() {
       {/* Summary stat cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 24 }}>
         <StatBox label="Dead Issues"  value={counts.dead}    sub="OPEN 90+ DAYS"          color="var(--red)"    />
+        <StatBox label="Stale Issues Ratio" value={`${staleIssuesRatio.toFixed(2)}%`} sub={`of ${allIssues.length} total issues`} color={` ${getStatus(staleIssuesRatio).color}`} />
         <StatBox label="Zombie PRs"   value={counts.zombie}  sub="PENDING 90+ DAYS"       color="var(--amber)"  />
-        <StatBox label="Risky Repos"  value={counts.risky}   sub="TOP-2 CONCENTRATION"    color="var(--amber)"  />
         <StatBox label="No License"   value={counts.license} sub="COMPLIANCE MISSING"     color="var(--text2)"  />
       </div>
 
@@ -190,7 +221,7 @@ export default function GovernancePage() {
               }}
             >
               {t.label}{' '}
-              <span style={{ color: counts[t.key] > 0 ? 'var(--red)' : 'var(--green)', marginLeft: 4 }}>
+              <span style={{ color: counts[t.key] > 40 ? 'var(--red)' : 'var(--green)', marginLeft: 4 }}>
                 {counts[t.key]}
               </span>
             </button>
@@ -221,28 +252,108 @@ export default function GovernancePage() {
           ) : <EmptyOk msg="No zombie PRs found" sub="This org reviews and closes contributions actively." />
         )}
 
-        {/* Risky Repos */}
-        {tab === 'risky' && (
-          riskyRepos.length ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {riskyRepos.map(r => {
-                const c     = r.contributors || []
-                const total = c.reduce((s, x) => s + x.contributions, 0) || 1
-                const pct   = Math.round(((c[0]?.contributions || 0) + (c[1]?.contributions || 0)) / total * 100)
-                return (
-                  <div key={r.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', background: 'var(--surface2)', borderRadius: 6 }}>
-                    <div>
-                      <div style={{ fontWeight: 500, fontSize: 13 }}>{r.name}</div>
-                      <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>
-                        Top 2 contributors own {pct}% of all commits — concentration risk
+        {/* Stale Issues */}
+        {tab === 'stale' && (
+          staleRepoStats.length ? (
+            <>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {paginatedStaleRepos.map(repo => {
+                  const status = getStatus(repo.ratio)
+
+                  return (
+                    <div
+                      key={repo.id}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '12px 14px',
+                        background: 'var(--surface2)',
+                        borderRadius: 6
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontWeight: 600 }}>
+                          {repo.repo}
+                        </div>
+
+                        <div
+                          style={{
+                            marginTop: 4,
+                            fontSize: 12,
+                            color: 'var(--text2)'
+                          }}
+                        >
+                          {repo.staleCount} stale issues out of{' '}
+                          {repo.openCount} open issues ({repo.ratio}%)
+                        </div>
+                      </div>
+
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 30
+                        }}
+                      >
+                        <span style={C.pill(status.color, status.bg)}>
+                          {status.label}
+                        </span>
+                        <a href={`https://github.com/${repo.org}/${repo.repo}/issues`} target="_blank" rel="noreferrer"
+                          style={{ fontSize: 12, color: 'var(--text2)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <FiExternalLink size={12} /> GitHub
+                        </a>
                       </div>
                     </div>
-                    <span style={C.pill('var(--red)', 'rgba(239,68,68,.12)')}>HIGH RISK</span>
-                  </div>
-                )
-              })}
-            </div>
-          ) : <EmptyOk msg="No high-concentration repos found" sub="Healthy contributor distribution across the portfolio." />
+                  )
+                })}
+              </div>
+
+              {totalPages > 1 && (
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: 16
+                  }}
+                >
+                  <button
+                    onClick={() => setStalePage(p => p - 1)}
+                    disabled={stalePage === 1}
+                    style={{
+                      padding: '8px 14px',
+                      cursor: stalePage === 1 ? 'not-allowed' : 'pointer',
+                      opacity: stalePage === 1 ? 0.5 : 1
+                    }}
+                  >
+                    ← Previous
+                  </button>
+
+                  <span style={{ fontSize: 13, color: 'var(--text2)' }}>
+                    Page {stalePage} of {totalPages}
+                  </span>
+
+                  <button
+                    onClick={() => setStalePage(p => p + 1)}
+                    disabled={stalePage === totalPages}
+                    style={{
+                      padding: '8px 14px',
+                      cursor: stalePage === totalPages ? 'not-allowed' : 'pointer',
+                      opacity: stalePage === totalPages ? 0.5 : 1
+                    }}
+                  >
+                    Next →
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <EmptyOk
+              msg="No stale issues found"
+              sub="All repositories have active open issues."
+            />
+          )
         )}
 
         {/* No License */}

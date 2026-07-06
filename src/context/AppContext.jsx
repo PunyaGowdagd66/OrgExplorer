@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, useCallback, useEffect } from 'react'
-import { fetchOrg, fetchRepos, fetchContributors, fetchIssues, } from '../services/github'
+import { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react'
+import { fetchOrg, fetchRepos, fetchContributors, fetchIssues, fetchRateLimit } from '../services/github'
 import { buildAnalyticalModel, getTopRepositories } from '../services/analytics'
 
 const Ctx = createContext(null)
@@ -63,6 +63,14 @@ export function AppProvider({ children }) {
     return () => clearTimeout(timeout)
   }, [rateLimit])
 
+  const refreshRateLimit = useCallback(async () => {
+    const rl = await fetchRateLimit(pat)
+    if (rl) {
+      setRateLimit(rl)
+      return true
+    }
+    return false
+  }, [pat])
   const savePat = useCallback(token => {
     setPat(token)
     token ? localStorage.setItem('oe_pat', token) : localStorage.removeItem('oe_pat')
@@ -192,6 +200,40 @@ export function AppProvider({ children }) {
     setGovLoading(false)
     setAuditComplete(!!pat)
   }, [isComplete, model, runFullExplore, auditRepos, pat, govLoading])
+
+  const STALE_DAYS = 90
+  
+  const staleRepoStats = useMemo(() => {
+    const now = Date.now()
+  
+    return Object.entries(issuesData || {}).map(([key, issues]) => {
+      const [org, repo] = key.split('/')
+  
+      const normalIssues = issues.filter(i => !i.pull_request)
+  
+      const openIssues = normalIssues.filter(i => i.state === 'open')
+  
+      const staleIssues = openIssues.filter(i => {
+        const updated = new Date(i.updated_at).getTime()
+        const diffDays = (now - updated) / (1000 * 60 * 60 * 24)
+        return diffDays >= STALE_DAYS
+      })
+  
+      const ratio =
+        openIssues.length === 0
+          ? 0
+          : Math.round((staleIssues.length / openIssues.length) * 100)
+  
+      return {
+        id: key,
+        org,
+        repo,
+        ratio,
+        staleCount: staleIssues.length,
+        openCount: openIssues.length
+      }
+    }).sort((a, b) => b.ratio - a.ratio)
+  }, [issuesData])
 
   return (
     <Ctx.Provider value={{
