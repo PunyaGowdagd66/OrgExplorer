@@ -124,14 +124,22 @@ export function AppProvider({ children }) {
     }
   }, [pat])
 
-  // Governance audit — parallel batches of 5 (Section 3.2.5)
   const runAudit = useCallback(async () => {
     if (!model || govLoading) return
     setGovLoading(true)
-    const map   = {}
-    const repos = pat? model.allRepos : model.allRepos.slice(0, 15)
+    const map = {}
 
-    // Batches of 5 using Promise.allSettled
+    // Group allRepos by org works for 1 org or many
+    const byOrg = {}
+    for (const repo of model.allRepos) {
+      (byOrg[repo.orgLogin] ??= []).push(repo)
+    }
+
+    // PAT than all repos in that org | no PAT then top 10 repos in that org
+    const repos = Object.values(byOrg).flatMap(orgRepos =>
+      pat ? orgRepos : getTopRepositories(orgRepos, 10)
+    )
+
     for (let i = 0; i < repos.length; i += 5) {
       const batch = repos.slice(i, i + 5)
       await Promise.allSettled(batch.map(async repo => {
@@ -146,7 +154,7 @@ export function AppProvider({ children }) {
     <Ctx.Provider value={{
       pat, savePat, orgs, model, issuesData,
       rateLimit, loading, loadMsg, govLoading, error, totalRepo,
-      explore, runAudit, setError,
+      explore, runAudit, setError
     }}>
       {children}
     </Ctx.Provider>
