@@ -9,6 +9,7 @@ import { IoChevronDown } from 'react-icons/io5'
 import { HiCheck, HiOutlineClock } from 'react-icons/hi'
 import { useAdvancedMetrics } from '../hooks/useSortedData'
 import AnalysisBanner from '../components/AnalysisBanner'
+import { AnalyticsSkeleton } from '../components/Orgexplorerskeletons'
 
 const TOOLTIP_STYLE = {
   contentStyle: {
@@ -51,6 +52,7 @@ export default function AnalyticsPage() {
     return key ? (pullsData[key] || []) : []
   }, [pullsData, selectedRepoForAM])
 
+  if(loading) return <AnalyticsSkeleton />
   if (!model) return null
 
   const advancedMetrics = useAdvancedMetrics(filteredPulls)
@@ -168,7 +170,7 @@ export default function AnalyticsPage() {
       {govLoading && (
         <InfoBox>
           <div style={{ fontSize: 14, color: 'var(--text)' }}>
-            Fetching issue and PR history for top 15 repositories in batches of 5...
+            Fetching issue and PR history for top 10 repositories in batches of 5...
           </div>
         </InfoBox>
       )}
