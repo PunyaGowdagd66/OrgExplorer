@@ -265,7 +265,7 @@ export default function LearnMoreModal({ open, onClose }) {
               padding: "10px 20px",
               borderRadius: 8,
               border: "1px solid var(--border)",
-              background: "transparent",
+              background: "var(--red)",
               color: "var(--text)",
               cursor: "pointer",
             }}

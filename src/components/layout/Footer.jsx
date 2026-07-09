@@ -129,7 +129,7 @@ export default function Footer() {
               text-zinc-500
             "
           >
-            © 2026 OrgExplorer
+            © {new Date().getFullYear()} OrgExplorer
           </p>
 
           <p
