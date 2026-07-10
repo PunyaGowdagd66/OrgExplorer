@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom'
 import EmptyStateCard from '../components/EmptyStateCard'
 import { AiOutlineInfoCircle } from "react-icons/ai";
 import AnalysisBanner from '../components/AnalysisBanner'
+import { ContributorSkeleton } from '../components/Orgexplorerskeletons'
 
 export default function ContributorsPage() {
   const { model, isComplete, loading, runFullExplore } = useApp()
@@ -56,6 +57,7 @@ export default function ContributorsPage() {
   const { sorted, sortConfig, onSort } = useSortedData(filtered, 'totalContribs', 'desc')
   const visible = sorted.slice(0, shown)
 
+  if(loading) return <ContributorSkeleton />
   if (!model) return null
 
   const topActive = contributors.slice(0, 10).filter(c => c.freshness > 50).length

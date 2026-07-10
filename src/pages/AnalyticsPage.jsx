@@ -9,6 +9,7 @@ import { IoChevronDown } from 'react-icons/io5'
 import { HiCheck, HiOutlineClock } from 'react-icons/hi'
 import { useAdvancedMetrics } from '../hooks/useSortedData'
 import AnalysisBanner from '../components/AnalysisBanner'
+import { AnalyticsSkeleton } from '../components/Orgexplorerskeletons'
 
 const TOOLTIP_STYLE = {
   contentStyle: {
@@ -51,9 +52,9 @@ export default function AnalyticsPage() {
     return key ? (pullsData[key] || []) : []
   }, [pullsData, selectedRepoForAM])
 
-
   const advancedMetrics = useAdvancedMetrics(filteredPulls)
 
+  if(loading) return <AnalyticsSkeleton />
   if (!model) return null
 
   const acceptanceChart = [

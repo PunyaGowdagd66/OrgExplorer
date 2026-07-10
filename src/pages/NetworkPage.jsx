@@ -6,6 +6,7 @@ import EmptyStateCard from '../components/EmptyStateCard'
 import { FiDatabase } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
 import AnalysisBanner from '../components/AnalysisBanner'
+import { NetworkSkeleton } from '../components/Orgexplorerskeletons'
 
 export default function NetworkPage() {
   const { model, isComplete, loading, runFullExplore } = useApp()
@@ -154,7 +155,8 @@ export default function NetworkPage() {
   }, [model, showRepos, showContribs])
 
   const navigate = useNavigate()
-
+  if(loading) return <NetworkSkeleton />
+  
   return (
     <div style={{ padding: '32px 24px', maxWidth: 1100, margin: '0 auto' }} className="fade-up">
       <AnalysisBanner

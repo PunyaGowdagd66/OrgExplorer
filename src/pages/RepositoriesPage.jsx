@@ -8,6 +8,7 @@ import { exportReposCSV } from '../services/analytics'
 import EmptyStateCard from '../components/EmptyStateCard'
 import { useNavigate } from 'react-router-dom'
 import AnalysisBanner from '../components/AnalysisBanner'
+import { RepositorySkeleton } from '../components/Orgexplorerskeletons';
 
 const ACTIVITY_CLASSIFICATIONS = ['All', 'Thriving', 'Active', 'Dormant', 'Hibernating']
 const ACTIVITY_COLORS = { Thriving: 'var(--green)', Active: 'var(--blue)', Dormant: 'var(--amber)', Hibernating: 'var(--red)' }
@@ -53,6 +54,7 @@ export default function RepositoriesPage() {
   const { sorted, sortConfig, onSort } = useSortedData(filtered, 'healthScore', 'desc')
   const visible = sorted.slice(0, shown)
 
+  if(loading) return <RepositorySkeleton />
   if (!model) return null
 
   const TABLE_COLS = [

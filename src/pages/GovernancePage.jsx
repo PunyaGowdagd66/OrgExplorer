@@ -3,6 +3,7 @@ import { FiRefreshCw, FiExternalLink } from 'react-icons/fi'
 import { useApp } from '../context/AppContext'
 import { C, PageTitle, EmptyOk } from '../components/UI'
 import AnalysisBanner from '../components/AnalysisBanner'
+import { GovernanceSkeleton } from '../components/Orgexplorerskeletons'
 
 const TABS = [
   { key: 'dead',    label: 'Dead Issues' },
@@ -62,6 +63,7 @@ export default function GovernancePage() {
     return arr
   }, [issuesData])
 
+  if(loading) return <GovernanceSkeleton />
   if (!model) return null
 
   const hasAudit = Object.keys(issuesData || {}).length > 0
