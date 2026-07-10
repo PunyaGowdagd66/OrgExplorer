@@ -193,7 +193,7 @@ export default function AnalyticsPage() {
                 <YAxis tick={{ fill: 'var(--text2)', fontSize: 11 }} />
                 <Tooltip {...TOOLTIP_STYLE} />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Area type="monotone" dataKey="prs_created" name="Created" stroke="var(--yellow)" fill="rgba(245,197,24,.1)" strokeWidth={2} />
+                <Area type="monotone" dataKey="prs_created" name="Created" stroke="var(--accent)" fill="rgba(245,197,24,.3)" strokeWidth={2} />
                 <Area type="monotone" dataKey="prs_merged"  name="Merged"  stroke="var(--green)" fill="rgba(34,197,94,.1)"  strokeWidth={2} />
                 <Area type="monotone" dataKey="prs_closed"  name="Closed"  stroke="var(--red)" fill="rgba(239,68,68,.1)"  strokeWidth={2} />
               </AreaChart>
@@ -211,7 +211,7 @@ export default function AnalyticsPage() {
                 <YAxis tick={{ fill: 'var(--text2)', fontSize: 11 }} />
                 <Tooltip {...TOOLTIP_STYLE} />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Area type="monotone" dataKey="issues_created" name="Created" stroke="var(--yellow)" fill="rgba(245,197,24,.1)" strokeWidth={2} />
+                <Area type="monotone" dataKey="issues_created" name="Created" stroke="var(--accent)" fill="rgba(245,197,24,.1)" strokeWidth={2} />
                 <Area type="monotone" dataKey="issues_closed"  name="Closed"  stroke="var(--green)" fill="rgba(34,197,94,.1)"  strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>

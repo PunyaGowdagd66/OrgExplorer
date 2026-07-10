@@ -33,8 +33,8 @@ export default function NetworkPage() {
     const topContribs = model.contributors
 
     const nodes = []
-    if (showRepos)    topRepos.forEach(r => nodes.push({ id: `repo:${r.name}`,    type: 'repo',        data: r, ts: new Date(r.pushed_at).getTime() }))
-    if (showContribs) topContribs.forEach(c => nodes.push({ id: `user:${c.login}`, type: 'contributor', data: c, ts: c.lastActive ? new Date(c.lastActive).getTime() : 0 }))
+    if (showRepos)    topRepos.forEach(r => nodes.push({ id: `repo:${r.name}`,    type: 'repo',        data: r, ts: new Date(r.pushed_at).getTime(), healthScore: r.healthScore }))
+    if (showContribs) topContribs.forEach(c => nodes.push({ id: `user:${c.login}`, type: 'contributor', data: c, ts: c.lastActive ? new Date(c.lastActive).getTime() : 0, healthScore: c.healthScore }))
 
     const nodeSet = new Set(nodes.map(n => n.id))
     const links   = []
